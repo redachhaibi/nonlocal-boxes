@@ -9,6 +9,7 @@ The repository is structured as follows. We only describe the most important fil
 |  |-- toto.py    : Something
 |-- ipynb: Contains Python notebooks which demonstrate how the code works
 |  |-- Eval.ipynb: Fast evaluation of the function to optimize
+|  |-- Eval2.ipynb: Fast evaluation of the function to optimize (V2)
 |-- tests: Unit tests
 |-- README.md: This file
 ```
