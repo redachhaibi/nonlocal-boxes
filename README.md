@@ -6,13 +6,13 @@ The repository is structured as follows. We only describe the most important fil
 ```bash
 ./
 |-- nonlocal-boxes: Core of package. 
-|  |-- toto.py    : Something
+|  |-- `toto.py`    : Something
 |-- ipynb: Contains Python notebooks which demonstrate how the code works
-|  |-- Eval.ipynb: Fast evaluation of the function to optimize
-|  |-- Eval2.ipynb: Fast evaluation of the function to optimize (V2)
-|  |-- Eval2 - notations.pdf: Explains the notations of `Eval2.ipynb`
+|  |-- `Eval.ipynb`: Fast evaluation of the function to optimize
+|  |-- `Eval2.ipynb`: Fast evaluation of the function to optimize (V2)
+|  |-- `Eval2 - notations.pdf`: Explains the notations of `Eval2.ipynb`
 |-- tests: Unit tests
-|-- README.md: This file
+|-- `README.md`: This file
 ```
 
 ## Installation
