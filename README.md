@@ -11,6 +11,8 @@ The repository is structured as follows. We only describe the most important fil
 |  |-- `Eval.ipynb`: Fast evaluation of the function to optimize
 |  |-- `Eval2.ipynb`: Fast evaluation of the function to optimize (V2)
 |  |-- `Eval2 - notations.pdf`: Explains the notations of `Eval2.ipynb`
+|  |-- `Eval3.ipynb`: Fast evaluation of the function to optimize (V3): now W is a matrix
+|  |-- `Eval3 - notations.pdf`: Explains the notations of `Eval3.ipynb`
 |-- tests: Unit tests
 |-- `README.md`: This file
 ```
