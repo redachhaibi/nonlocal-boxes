@@ -44,7 +44,7 @@ $ pip install --upgrade setuptools
 $ pip install wheel
 ```
 
-5. Install the `nonLocalBoxes` package (later).
+5. Install the `nonLocalBoxes` package.
 
 ```bash
 python setup.py develop
