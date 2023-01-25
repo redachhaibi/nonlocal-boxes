@@ -14,6 +14,7 @@ The repository is structured as follows. We only describe the most important fil
 |  |-- `Eval3.ipynb`: Fast evaluation of the function to optimize (V3): now W is a matrix
 |  |-- `Eval3 - notations.pdf`: Explains the notations of `Eval3.ipynb`
 |  |-- `Check-triangle-PR-P0-P1.ipynb`: Numerically check the known result in the triangle {PR, P0, P1}.
+|  |-- `Eval4.ipynb`: Tests with the package containing the function to evaluate.
 |-- tests: Unit tests
 |-- `README.md`: This file
 ```
