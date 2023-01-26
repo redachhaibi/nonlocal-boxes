@@ -3,7 +3,7 @@ import torch
 import non_local_boxes.utils
 
 
-nb_columns = 10
+nb_columns = 1
 
 
 
@@ -33,7 +33,7 @@ for x in range(2):
         A1[x, 3, j, 3] = sign*(-x)
 
 
-# A2 is a 2x4x4xnb_columns-tensor
+# A2 is a 2x4x4xn tensor
 A2 = torch.zeros( (2, 4, 4, nb_columns) )
 for x in range(2):
     for i in range(4):
@@ -63,7 +63,7 @@ for y in range(2):
         A3[y, 3, j, 3 +4] = sign*(-y)
 
 
-# A4 is a 2x4x4xnb_columns-tensor
+# A4 is a 2x4x4xn-tensor
 A4 = torch.zeros( (2, 4, 4, nb_columns) )
 for y in range(2):
     for i in range(4):
@@ -75,10 +75,12 @@ for y in range(2):
 
 def A(W):    # W is a 32xn matrix
     T1 = torch.tensordot(A1, W, dims=1) + A2
-    T2 = torch.kron(torch.ones((2)), T1)
+    #T2 = torch.reshape(torch.kron(torch.ones((2)), T1), (2,2,4,4,-1))
+    T2 = T1.repeat(2, 1, 1, 1, 1)
     T3 = torch.transpose(T2, 0, 1)
     S1 = torch.tensordot(A3, W, dims=1) + A4
-    S2 = torch.kron(torch.ones((2)), S1)
+    #S2 = torch.reshape(torch.kron(torch.ones((2)), S1), (2,2,4,4,-1))
+    S2 = S1.repeat(2, 1, 1, 1, 1)
     R = torch.transpose(T3 * S2, 4, 2)
     return torch.transpose(R, 4, 3)
     # the output is a 2x2xnx4x4 tensor
@@ -139,10 +141,12 @@ B4 = A4
 
 def B(W):    # W is a 32xn matrix
     T1 = torch.tensordot(B1, W, dims=1) + B2
-    T2 = torch.kron(torch.ones((2)), T1)
+    #T2 = torch.reshape(torch.kron(torch.ones((2)), T1), (2,2,4,4,-1))
+    T2 = T1.repeat(2, 1, 1, 1, 1)
     T3 = torch.transpose(T2, 0, 1)
     S1 = torch.tensordot(B3, W, dims=1) + B4
-    S2 = torch.kron(torch.ones((2)), S1)
+    #S2 = torch.reshape(torch.kron(torch.ones((2)), S1), (2,2,4,4,-1))
+    S2 = S1.repeat(2, 1, 1, 1, 1)
     R = torch.transpose(T3 * S2, 4, 2)
     return torch.transpose(R, 4, 3)
     # the output is a 2x2xnx4x4 tensor
@@ -194,7 +198,8 @@ for x in range(2):
 
 def C(W):    # W is a 32xn matrix
     T1 = torch.tensordot(C1, W, dims=1) + C2
-    T2 = torch.kron( torch.ones((2,2)), T1)  # Kronecker product
+    # T2 = torch.reshape(torch.kron( torch.ones((2,2)), T1), (2,2,2,2,4,4,-1))
+    T2 = T1.repeat(2, 2, 1, 1, 1, 1, 1)
     R = torch.transpose(T2, 0, 1)
     R = torch.transpose(R, 0, 3)
     R = torch.transpose(R, 0, 2)
@@ -248,7 +253,8 @@ for y in range(2):
 
 def D(W):    # W is a 32xn matrix
     T1 = torch.tensordot(D1, W, dims=1) + D2
-    T2 = torch.kron( torch.ones((2,2)), T1)  # Kronecker product
+    # T2 = torch.reshape(torch.kron( torch.ones((2,2)), T1), (2,2,2,2,4,4,-1))
+    T2 = T1.repeat(2, 2, 1, 1, 1, 1, 1)
     R = torch.transpose(T2, 1, 2)
     R = torch.transpose(R, 6, 4)
     R = torch.transpose(R, 6, 5)
@@ -266,7 +272,8 @@ def D(W):    # W is a 32xn matrix
 def R(W, P, Q):     # W is a 32xn matrix, P and Q are 4x4 matrices
     T1 = torch.tensordot(A(W), P, dims=1)  # green term
     T2 = torch.transpose(torch.tensordot(B(W), Q, dims=1), 4, 3)  # blue term
-    T3 = torch.kron(torch.ones((2,2)), T1*T2)   # Kronecker product
+    #T3 = torch.reshape(torch.kron(torch.ones((2,2)), T1*T2), (2,2,2,2,-1,4,4))
+    T3 = (T1*T2).repeat(2,2,1,1,1,1,1)
     T4 = T3 * C(W) * D(W)  # the big bracket
     return torch.tensordot(T4, torch.ones((4, 4)), dims=2)
     #T5 = torch.tensordot(T4, torch.ones((4)), dims=1)
@@ -290,7 +297,7 @@ def h_flat(R):  # R is a 2x2x2x2xn tensor
 
 
 #
-#   FUNCTION TO MAXIMIZE
+#   FUNCTION TO MAXIMIZE in W
 #
 
 def phi_flat(W, P, Q):

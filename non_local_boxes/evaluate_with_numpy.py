@@ -2,7 +2,7 @@ import numpy as np
 import non_local_boxes.utils
 
 
-nb_columns = 100000
+nb_columns = 1
 
 
 
