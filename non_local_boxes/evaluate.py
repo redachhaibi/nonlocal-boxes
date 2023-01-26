@@ -2,7 +2,7 @@ import numpy as np
 import non_local_boxes.utils
 
 
-nb_columns = 1000
+nb_columns = 100000
 
 
 
@@ -189,7 +189,7 @@ for x in range(2):
                 C2[0, x, i, j]=1
 
 
-def C(W):    # W is a vector with 32 entries
+def C(W):    # W is a 32xn matrix
     T1 = np.tensordot(C1, W, axes=([4, 0])) + C2
     T2 = np.tensordot( np.ones((2,2)), T1, axes=0)  # Kronecker product
     return np.transpose(T2, (2, 0, 3, 1, 6, 4, 5))

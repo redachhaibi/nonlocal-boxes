@@ -18,6 +18,9 @@ def W_BS09(n):  # n is the number of columns
 def random_wiring(n):  # n is the number of columns
     return np.random.rand(32, n)
 
+def random_extremal_wiring(n):  # n is the number of columns
+    return np.random.randint(2, size=(32,n))
+
 
 
 
