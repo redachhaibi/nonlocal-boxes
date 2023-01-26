@@ -5,17 +5,21 @@
 The repository is structured as follows. We only describe the most important files for a new user.
 ```bash
 ./
-|-- nonlocal-boxes: Core of package. 
-|  |-- `toto.py`    : Something
-|-- ipynb: Contains Python notebooks which demonstrate how the code works
-|  |-- `Eval.ipynb`: Fast evaluation of the function to optimize
-|  |-- `Eval2.ipynb`: Fast evaluation of the function to optimize (V2)
-|  |-- `Eval2 - notations.pdf`: Explains the notations of `Eval2.ipynb`
-|  |-- `Eval3.ipynb`: Fast evaluation of the function to optimize (V3): now W is a matrix
-|  |-- `Eval3 - notations.pdf`: Explains the notations of `Eval3.ipynb`
+|-- nonlocal-boxes/: Core of package. 
+|  |-- `__init__.py`: init file.
+|  |-- 'evaluate.py': package of the function to evaluate, using PyTorch (and 'evaluate_with_numpy.py' for the same with NumPy).
+|  |-- 'utils.py': package of the constants, using PyTorch (and 'utils_with_numpy.py' for the same with NumPy)
+|-- ipynb/: Contains Python notebooks which demonstrate how the code works
 |  |-- `Check-triangle-PR-P0-P1.ipynb`: Numerically check the known result in the triangle {PR, P0, P1}.
+|  |-- `Eval.ipynb`: Fast evaluation of the function to optimize.
+|  |-- `Eval2.ipynb`: Fast evaluation of the function to optimize (V2).
+|  |-- `Eval2 - notations.pdf`: Explains the notations of `Eval2.ipynb`.
+|  |-- `Eval3.ipynb`: Fast evaluation of the function to optimize (V3): now W is a matrix.
+|  |-- `Eval3 - notations.pdf`: Explains the notations of `Eval3.ipynb`.
 |  |-- `Eval4.ipynb`: Tests with the package containing the function to evaluate.
-|-- tests: Unit tests
+|  |-- `Pytorch-tests.ipynb`: Tests with PyTorch.
+|  |-- `sdf2pointCloud_2D.ipynb`: Reda s example of gradient descent.
+|-- tests/: Unit tests
 |-- `README.md`: This file
 ```
 

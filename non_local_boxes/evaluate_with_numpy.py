@@ -1,9 +1,8 @@
-#import numpy as np
-import torch
+import numpy as np
 import non_local_boxes.utils
 
 
-nb_columns = 10
+nb_columns = 100000
 
 
 
@@ -14,7 +13,7 @@ nb_columns = 10
 #
 
 # A1 is a 2x4x4x32-tensor
-A1 = torch.zeros( (2, 4, 4, 32) )
+A1 = np.zeros( (2, 4, 4, 32) )
 for x in range(2):
     for j in range(4):
         
@@ -34,7 +33,7 @@ for x in range(2):
 
 
 # A2 is a 2x4x4xnb_columns-tensor
-A2 = torch.zeros( (2, 4, 4, nb_columns) )
+A2 = np.zeros( (2, 4, 4, nb_columns) )
 for x in range(2):
     for i in range(4):
         for k in range(4):
@@ -44,7 +43,7 @@ for x in range(2):
 
 
 # A3 is a 2x4x4x32-tensor
-A3 = torch.zeros( (2, 4, 4, 32) )
+A3 = np.zeros( (2, 4, 4, 32) )
 for y in range(2):
     for j in range(4):
         
@@ -64,7 +63,7 @@ for y in range(2):
 
 
 # A4 is a 2x4x4xnb_columns-tensor
-A4 = torch.zeros( (2, 4, 4, nb_columns) )
+A4 = np.zeros( (2, 4, 4, nb_columns) )
 for y in range(2):
     for i in range(4):
         for k in range(4):
@@ -74,13 +73,12 @@ for y in range(2):
 
 
 def A(W):    # W is a 32xn matrix
-    T1 = torch.tensordot(A1, W, dims=1) + A2
-    T2 = torch.kron(torch.ones((2)), T1)
-    T3 = torch.transpose(T2, 0, 1)
-    S1 = torch.tensordot(A3, W, dims=1) + A4
-    S2 = torch.kron(torch.ones((2)), S1)
-    R = torch.transpose(T3 * S2, 4, 2)
-    return torch.transpose(R, 4, 3)
+    T1 = np.tensordot(A1, W, axes=([3, 0])) + A2
+    T2 = np.tensordot(np.ones((2)), T1, axes=0)
+    T3 = np.transpose(T2, (1,0,2,3,4))
+    S1 = np.tensordot(A3, W, axes=([3, 0])) + A4
+    S2 = np.tensordot(np.ones((2)), S1, axes=0)
+    return np.transpose(T3 * S2, (0,1,4,2,3))
     # the output is a 2x2xnx4x4 tensor
 
 
@@ -92,7 +90,7 @@ def A(W):    # W is a 32xn matrix
 #
 
 # B1 is a 2x4x4x32-tensor
-B1 = torch.zeros( (2, 4, 4, 32) )
+B1 = np.zeros( (2, 4, 4, 32) )
 for x in range(2):
     for l in range(4):
         
@@ -116,7 +114,7 @@ B2 = A2
 
 
 # B3 is a 2x4x4x32-tensor
-B3 = torch.zeros( (2, 4, 4, 32) )
+B3 = np.zeros( (2, 4, 4, 32) )
 for y in range(2):
     for l in range(4):
         
@@ -138,13 +136,12 @@ for y in range(2):
 B4 = A4
 
 def B(W):    # W is a 32xn matrix
-    T1 = torch.tensordot(B1, W, dims=1) + B2
-    T2 = torch.kron(torch.ones((2)), T1)
-    T3 = torch.transpose(T2, 0, 1)
-    S1 = torch.tensordot(B3, W, dims=1) + B4
-    S2 = torch.kron(torch.ones((2)), S1)
-    R = torch.transpose(T3 * S2, 4, 2)
-    return torch.transpose(R, 4, 3)
+    T1 = np.tensordot(B1, W, axes=([3, 0])) + B2
+    T2 = np.tensordot(np.ones((2)), T1, axes=0)
+    T3 = np.transpose(T2, (1,0,2,3,4))
+    S1 = np.tensordot(B3, W, axes=([3, 0])) + B4
+    S2 = np.tensordot(np.ones((2)), S1, axes=0)
+    return np.transpose(T3 * S2, (0,1,4,2,3))
     # the output is a 2x2xnx4x4 tensor
 
 
@@ -156,7 +153,7 @@ def B(W):    # W is a 32xn matrix
 #
 
 # C1 is a 2x2x4x4x32-tensor
-C1 = torch.zeros( (2, 2, 4, 4, 32) )
+C1 = np.zeros( (2, 2, 4, 4, 32) )
 for a in range(2):
     for x in range(2):
         for j in range(4):
@@ -184,7 +181,7 @@ for a in range(2):
 
 
 # C2 is a 2x2x4x4xnb_columns-tensor
-C2 = torch.zeros( (2, 2, 4, 4, nb_columns) )
+C2 = np.zeros( (2, 2, 4, 4, nb_columns) )
 for x in range(2):
     for i in range(4):
         for j in range(4):
@@ -193,14 +190,9 @@ for x in range(2):
 
 
 def C(W):    # W is a 32xn matrix
-    T1 = torch.tensordot(C1, W, dims=1) + C2
-    T2 = torch.kron( torch.ones((2,2)), T1)  # Kronecker product
-    R = torch.transpose(T2, 0, 1)
-    R = torch.transpose(R, 0, 3)
-    R = torch.transpose(R, 0, 2)
-    R = torch.transpose(R, 6, 4)
-    R = torch.transpose(R, 6, 5)
-    return R
+    T1 = np.tensordot(C1, W, axes=([4, 0])) + C2
+    T2 = np.tensordot( np.ones((2,2)), T1, axes=0)  # Kronecker product
+    return np.transpose(T2, (2, 0, 3, 1, 6, 4, 5))
     # the output is a 2x2x2x2xnx4x4 tensor
 
 
@@ -212,7 +204,7 @@ def C(W):    # W is a 32xn matrix
 #
 
 # D1 is a 2x2x4x4x32-tensor
-D1 = torch.zeros( (2, 2, 4, 4, 32) )
+D1 = np.zeros( (2, 2, 4, 4, 32) )
 for b in range(2):
     for y in range(2):
         for j in range(4):
@@ -239,7 +231,7 @@ for b in range(2):
                 D1[b, y, 3, j, 5 + 26] = -(y) * (-1)**b
 
 # D2 is a 2x2x4x4xnb_columns-tensor
-D2 = torch.zeros( (2, 2, 4, 4, nb_columns) )
+D2 = np.zeros( (2, 2, 4, 4, nb_columns) )
 for y in range(2):
     for i in range(4):
         for j in range(4):
@@ -247,12 +239,9 @@ for y in range(2):
                 D2[0, y, i, j] = 1
 
 def D(W):    # W is a 32xn matrix
-    T1 = torch.tensordot(D1, W, dims=1) + D2
-    T2 = torch.kron( torch.ones((2,2)), T1)  # Kronecker product
-    R = torch.transpose(T2, 1, 2)
-    R = torch.transpose(R, 6, 4)
-    R = torch.transpose(R, 6, 5)
-    return R
+    T1 = np.tensordot(D1, W, axes=([4, 0])) + D2
+    T2 = np.tensordot( np.ones((2,2)), T1, axes=0)  # Kronecker product
+    return np.transpose(T2, (0, 2, 1, 3, 6, 4, 5))
     # the output is a 2x2x2x2xnx4x4 tensor
 
 
@@ -264,13 +253,12 @@ def D(W):    # W is a 32xn matrix
 #
 
 def R(W, P, Q):     # W is a 32xn matrix, P and Q are 4x4 matrices
-    T1 = torch.tensordot(A(W), P, dims=1)  # green term
-    T2 = torch.transpose(torch.tensordot(B(W), Q, dims=1), 4, 3)  # blue term
-    T3 = torch.kron(torch.ones((2,2)), T1*T2)   # Kronecker product
+    T1 = np.tensordot(A(W), P, axes=([4, 0]))  # green term
+    T2 = np.transpose(np.tensordot(B(W), Q, axes=([4, 0])), (0,1,2,4,3))  # blue term
+    T3 = np.tensordot(np.ones((2,2)), T1*T2, axes = 0)   # Kronecker product
     T4 = T3 * C(W) * D(W)  # the big bracket
-    return torch.tensordot(T4, torch.ones((4, 4)), dims=2)
-    #T5 = torch.tensordot(T4, torch.ones((4)), dims=1)
-    #return torch.tensordot(T5, torch.ones((4)), dims=1)
+    T5 = np.tensordot(T4, np.ones((4)), axes=([6, 0]))
+    return np.tensordot(T5, np.ones((4)), axes = ([5,0]))
     # the output is a 2x2x2x2xn tensor
 
 
@@ -282,8 +270,8 @@ def R(W, P, Q):     # W is a 32xn matrix, P and Q are 4x4 matrices
 #
 
 def h_flat(R):  # R is a 2x2x2x2xn tensor
-    R = torch.reshape(R, (16, -1))
-    return torch.tensordot( non_local_boxes.utils.CHSH_flat, R, dims=1 )  # scalar product of CHSH and each column of R
+    R = np.reshape(R, (16, -1))
+    return np.dot( non_local_boxes.utils.CHSH_flat, R )  # scalar product of CHSH and each column of R
 
 
 

@@ -1,5 +1,4 @@
-#import numpy as np
-import torch
+import numpy as np
 
 #
 #   WIRINGS
@@ -13,14 +12,14 @@ def W_BS09(n):  # n is the number of columns
             0, 1, 1, 0, 0, 1, 1, 0,  # f_3(x, a_1, a_2) = a_1 + a_2 mod 2
             0, 1, 1, 0, 0, 1, 1, 0   # g_3(y, b_1, b_2) = b_1 + b_2 mod 2
             ]
-    return torch.kron(torch.ones(n), W).T
+    return np.tensordot(np.ones(n), W, axes=0).T
 
 
 def random_wiring(n):  # n is the number of columns
-    return torch.rand((32, n))
+    return np.random.rand(32, n)
 
 def random_extremal_wiring(n):  # n is the number of columns
-    return torch.randint(2, (32,n))
+    return np.random.randint(2, size=(32,n))
 
 
 
@@ -30,15 +29,10 @@ def random_extremal_wiring(n):  # n is the number of columns
 #
 
 def matrix_to_tensor(Matrix):
-    T = torch.reshape(Matrix, (2,2,2,2))
-    T = torch.transpose(T, 0, 2)
-    T = torch.transpose(T, 1, 3)
-    return T
+    return np.transpose(np.reshape(Matrix, (2,2,2,2)), (2,3,0,1))
 
 def tensor_to_matrix(Tensor):
-    M = torch.transpose(Tensor, 0, 2)
-    M = torch.transpose(M, 1, 3)
-    return torch.reshape(M, (4,4))
+    return np.reshape(np.transpose(Tensor, (2,3,0,1)), (4,4))
 
 
 
@@ -48,7 +42,7 @@ def tensor_to_matrix(Tensor):
 #
 
 def P_L(mu, nu, sigma, tau):
-    new_box = torch.zeros((4,4))
+    new_box = np.zeros((4,4))
     
     for a in range(2):
         for b in range(2):
@@ -61,7 +55,7 @@ def P_L(mu, nu, sigma, tau):
 
 
 def P_NL(mu, nu, sigma):
-    new_box = torch.zeros((4,4))
+    new_box = np.zeros((4,4))
     
     for a in range(2):
         for b in range(2):
@@ -79,7 +73,7 @@ P_1 = P_L(0,1,0,1)
 SR = (P_0 + P_1)/2
 PR = P_NL(0,0,0)
 PRbar = P_NL(0,0,1)
-I = 0.25*torch.ones((4,4))
+I = 0.25*np.ones((4,4))
 SRbar = 2*I-SR
 
 
@@ -96,7 +90,7 @@ def corNLB(p):
 #   CHSH
 #
 
-CHSH = torch.zeros((4,4))
+CHSH = np.zeros((4,4))
 
 for a in range(2):
     for b in range(2):
