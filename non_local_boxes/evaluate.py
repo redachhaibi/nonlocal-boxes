@@ -3,7 +3,7 @@ import torch
 import non_local_boxes.utils
 
 
-nb_columns = 3
+nb_columns = 1000
 
 
 
