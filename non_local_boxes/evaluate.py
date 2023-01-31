@@ -3,7 +3,7 @@ import torch
 import non_local_boxes.utils
 
 
-nb_columns = 1000
+nb_columns = 3
 
 
 
@@ -306,4 +306,33 @@ def phi_flat(W, P, Q):
     # Q is a box: a 4x4 matrix
     
     return h_flat( R(W,P,Q) )
-    # the output is a number between 0 and 1
+    # the output is a list of numbers between 0 and 1 (n terms)
+
+
+
+def phi_power(W, P, N):
+    # W is a 32xn matrix
+    # P is a box: a 4x4 matrix
+    # N is the power of P
+
+    # # # Q1=torch.clone(P)
+    # # # Q1=non_local_boxes.utils.matrix_to_tensor(Q1)  
+    # # # # Q1 is a 2x2x2x2 tensor
+    
+    # # # Q2 = R(W, non_local_boxes.utils.tensor_to_matrix(Q1), P)
+    # # # # Q2 is a 2x2x2x2xn tensor
+
+    # # # Q3 = torch.zeros(2, 2, 2, 2, nb_columns)
+    # # # for alpha in range(nb_columns):
+    # # #     Q3[:,:,:,:,alpha] = R(W, non_local_boxes.utils.tensor_to_matrix(Q2[:,:,:,:,alpha]), P)[:,:,:,:,alpha]
+
+    Q = torch.clone(P)
+    Q = non_local_boxes.utils.matrix_to_tensor(Q) # Q is a 2x2x2x2 tensor
+    Q = R(W, non_local_boxes.utils.tensor_to_matrix(Q), P) # Now on, Q is a 2x2x2x2xn tensor
+    for k in range(N-2):
+        for alpha in range(nb_columns):
+            Q[:,:,:,:,alpha] = R(W, non_local_boxes.utils.tensor_to_matrix(Q[:,:,:,:,alpha]), P)[:,:,:,:,alpha]
+
+    
+    return h_flat( Q )
+    # the output is a list of numbers between 0 and 1 (n terms)
