@@ -3,7 +3,7 @@ import torch
 import non_local_boxes.utils
 
 
-nb_columns = 3
+nb_columns = 1000
 
 
 
@@ -326,13 +326,37 @@ def phi_power(W, P, N):
     # # # for alpha in range(nb_columns):
     # # #     Q3[:,:,:,:,alpha] = R(W, non_local_boxes.utils.tensor_to_matrix(Q2[:,:,:,:,alpha]), P)[:,:,:,:,alpha]
 
-    Q = torch.clone(P)
-    Q = non_local_boxes.utils.matrix_to_tensor(Q) # Q is a 2x2x2x2 tensor
-    Q = R(W, non_local_boxes.utils.tensor_to_matrix(Q), P) # Now on, Q is a 2x2x2x2xn tensor
+    # Q = torch.clone(P)
+    # Q = non_local_boxes.utils.matrix_to_tensor(Q) # Q is a 2x2x2x2 tensor
+    # Q = R(W, P, P) 
+    # for k in range(N-2):
+    #     for alpha in range(nb_columns):
+    #         Q[:,:,:,:,alpha] = R(W, non_local_boxes.utils.tensor_to_matrix(Q[:,:,:,:,alpha]), P)[:,:,:,:,alpha]
+    # return h_flat( Q )
+
+    Q = torch.zeros(N+1,2,2,2,2,nb_columns)
+    Q[2,:,:,:,:,:] = R(W, P, P) 
     for k in range(N-2):
         for alpha in range(nb_columns):
-            Q[:,:,:,:,alpha] = R(W, non_local_boxes.utils.tensor_to_matrix(Q[:,:,:,:,alpha]), P)[:,:,:,:,alpha]
+            Q[k+3,:,:,:,:,alpha] = R(W, non_local_boxes.utils.tensor_to_matrix(Q[k+2,:,:,:,:,alpha]), P)[:,:,:,:,alpha]
 
     
-    return h_flat( Q )
+    return h_flat( Q[N,:,:,:,:,:] )
     # the output is a list of numbers between 0 and 1 (n terms)
+
+
+
+def box_power_recursive(W, P, N):
+    if N==1:
+        return P
+    if N==2:
+        return R(W, P, P) 
+    Q = box_power_recursive(W,P,N-1)
+    Q_prime = torch.zeros_like(Q)
+    for alpha in range(nb_columns):
+        Q_prime[:,:,:,:,alpha] = R(W, non_local_boxes.utils.tensor_to_matrix(Q[:,:,:,:,alpha]), P)[:,:,:,:,alpha]
+    return Q_prime
+
+
+def phi_power_recursive(W, P, N):
+    return h_flat(box_power_recursive(W, P, N))
