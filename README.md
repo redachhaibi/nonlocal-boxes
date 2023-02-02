@@ -17,6 +17,8 @@ The repository is structured as follows. We only describe the most important fil
 |  |-- `Eval3.ipynb`: Fast evaluation of the function to optimize (V3): now W is a matrix.
 |  |-- `Eval3 - notations.pdf`: Explains the notations of `Eval3.ipynb`.
 |  |-- `Eval4.ipynb`: Tests with the package containing the function to evaluate.
+|  |-- `Gradient-Descent.ipynb`: Basic gradient descent.
+|  |-- `Gradient-Descent-2.ipynb`: Clean version of `Gradient-Descent.ipynb`.
 |  |-- `Pytorch-tests.ipynb`: Tests with PyTorch.
 |  |-- `sdf2pointCloud_2D.ipynb`: Reda s example of gradient descent.
 |-- tests/: Unit tests
