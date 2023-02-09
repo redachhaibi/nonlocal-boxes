@@ -10,6 +10,7 @@ The repository is structured as follows. We only describe the most important fil
 |  |-- 'evaluate.py': package of the function to evaluate, using PyTorch (and 'evaluate_with_numpy.py' for the same with NumPy).
 |  |-- 'utils.py': package of the constants, using PyTorch (and 'utils_with_numpy.py' for the same with NumPy)
 |-- ipynb/: Contains Python notebooks which demonstrate how the code works
+|  |-- `BG15.ipynb`: implementation of [BG15]
 |  |-- `Check-triangle-PR-P0-P1.ipynb`: Numerically check the known result in the triangle {PR, P0, P1}.
 |  |-- `Eval.ipynb`: Fast evaluation of the function to optimize.
 |  |-- `Eval2.ipynb`: Fast evaluation of the function to optimize (V2).
@@ -19,6 +20,7 @@ The repository is structured as follows. We only describe the most important fil
 |  |-- `Eval4.ipynb`: Tests with the package containing the function to evaluate.
 |  |-- `Gradient-Descent.ipynb`: Basic gradient descent.
 |  |-- `Gradient-Descent-2.ipynb`: Clean version of `Gradient-Descent.ipynb`.
+|  |-- `Gradient-Descent-3.ipynb`: Same as `Gradient-Descent.ipynb`, but with tests with different boxes.
 |  |-- `Pytorch-tests.ipynb`: Tests with PyTorch.
 |  |-- `sdf2pointCloud_2D.ipynb`: Reda s example of gradient descent.
 |-- tests/: Unit tests

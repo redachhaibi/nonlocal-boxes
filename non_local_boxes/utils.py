@@ -89,6 +89,7 @@ P_1 = P_L(0,1,0,1)
 SR = (P_0 + P_1)/2
 PR = P_NL(0,0,0)
 PRbar = P_NL(0,0,1)
+PRprime = P_NL(1,1,1)
 I = 0.25*torch.ones((4,4))
 SRbar = 2*I-SR
 
