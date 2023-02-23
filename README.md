@@ -56,19 +56,19 @@ $ pip install wheel
 5. Install the `nonLocalBoxes` package.
 
 ```bash
-python setup.py develop
+$ python setup.py develop
 ```
 
 6. (Optional) In order to use Jupyter with this virtual environment .venv
 ```bash
-pip install ipykernel
-python -m ipykernel install --user --name=.venv_boxes
+$ pip install ipykernel
+$ python -m ipykernel install --user --name=.venv_boxes
 ```
 (see https://janakiev.com/blog/jupyter-virtual-envs/ for details)
 
 7. (Not needed if step 5 is used) Packages
 ```bash
-pip install numpy matplotlib scipy torch
+$ pip install numpy matplotlib scipy torch
 ```
 
 ## Configuration
