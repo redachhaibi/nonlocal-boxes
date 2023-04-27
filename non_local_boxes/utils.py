@@ -5,6 +5,21 @@ import torch
 #   WIRINGS
 #
 
+def functions_to_wiring(f1, g1, f2, g2, f3, g3):
+    # the fi and gj are tensors
+    W = torch.zeros(32)
+    for x in range(2):
+        for a in range(2):
+            W[2*x+a] = f1[x,a]
+            W[2*x+a+4] = g1[x,a]
+            W[2*x+a+8] = f2[x,a]
+            W[2*x+a+12] = g2[x,a]
+            for a2 in range(2):
+                W[4*x+2*a+a2+16] = f3[x,a,a2]
+                W[4*x+2*a+a2+24] = g3[x,a,a2]
+    return W
+
+
 def W_BS09(n):  # n is the number of columns
     W = torch.tensor([0., 0., 1., 1.,              # f_1(x, a_2) = x
             0., 0., 1., 1.,              # g_1(y, b_2) = y
@@ -15,6 +30,27 @@ def W_BS09(n):  # n is the number of columns
             ], requires_grad=True)
     return torch.t(W.repeat(n, 1))
 
+def W_FWW09(n):  # n is the number of columns
+    f1 = torch.zeros((2,2))
+    g1 = torch.zeros((2,2))
+    f2 = torch.zeros((2,2))
+    g2 = torch.zeros((2,2))
+    f3 = torch.zeros((2,2,2))
+    g3 = torch.zeros((2,2,2))
+
+    for x in range(2):
+        for a in range(2):
+            f1[x,a] = x
+            g1[x,a] = x
+            f2[x,a] = x
+            g2[x,a] = x
+            for a2 in range(2):
+                f3[x,a,a2] = (a+a2)%2
+                g3[x,a,a2] = (a+a2)%2
+
+    W = functions_to_wiring(f1, g1, f2, g2, f3, g3)
+    W.requires_grad = True
+    return torch.t(W.repeat(n, 1))
 
 def random_wiring(n):  # n is the number of columns
     return torch.rand((32, n), requires_grad=True)
@@ -23,18 +59,227 @@ def random_extremal_wiring(n):  # n is the number of columns
     return torch.randint(2, (32,n))
 
 def wiring_to_functions(W):  # BE CAREFUL!! Here W is a list (with 32 entries)
-    print("f_1(x,a2) = ", (W[2]-W[0])%2, "x ⊕ ", (W[1]-W[0])%2 ,"a2 ⊕ ", (W[3]-W[2]-W[1]+W[0])%2 ,"x*a2 ⊕ ", (W[0])%2)
-    print("g_1(y,b2) = ", (W[6]-W[4])%2, "y ⊕ ", (W[5]-W[4])%2 ,"b2 ⊕ ", (W[7]-W[6]-W[5]+W[4])%2 ,"y*b2 ⊕ ", (W[4])%2)
-    print("f_2(x,a1) = ", (W[10]-W[8])%2, "x ⊕ ", (W[9]-W[8])%2 ,"a1 ⊕ ", (W[11]-W[10]-W[9]+W[8])%2 ,"x*a1 ⊕ ", (W[8])%2)
-    print("g_2(y,b1) = ", (W[14]-W[12])%2, "y ⊕ ", (W[13]-W[12])%2 ,"b1 ⊕ ", (W[15]-W[14]-W[13]+W[12])%2 ,"y*b1 ⊕ ", (W[12])%2)
-    print("f_3(x,a1,a2) = ", (W[20]-W[16])%2, "x ⊕ ", (W[18]-W[16])%2 ,"a1 ⊕ ", (W[17]-W[16])%2 ,"a2 ⊕ ", 
-          (W[21]-W[20]-W[18]+W[16])%2 ,"x*a1 ⊕ ", (W[22]-W[20]-W[17]+W[16])%2 ,"x*a2 ⊕ ", 
-          (W[19]-W[18]-W[17]+W[16])%2 ,"a1*a2 ⊕ ", 
-          (W[23] - W[21] - W[22]+W[20] - W[19]+W[18]+W[17] - W[16])%2,"x*a1*a2 ⊕ ", (W[16])%2)
-    print("g_3(y,b1,b2) = ", (W[28]-W[24])%2, "y ⊕ ", (W[26]-W[24])%2 ,"b1 ⊕ ", (W[25]-W[24])%2 ,"b2 ⊕ ", 
-          (W[29]-W[28]-W[26]+W[24])%2 ,"y*b1 ⊕ ", (W[30]-W[28]-W[25]+W[24])%2 ,"y*b2 ⊕ ", 
-          (W[27]-W[26]-W[25]+W[24])%2 ,"b1*b2 ⊕ ", 
-          (W[31] - W[29] - W[30]+W[28] - W[27]+W[26]+W[25] - W[24])%2,"y*b1*b2 ⊕ ", (W[16])%2)
+    # f1
+    string0 = "f_1(x,a2) = "
+    string = string0
+    c = (W[2]-W[0])%2
+    if c != 0:
+        if c!=1: string+=str(c)+" "
+        string+= "x"
+
+    c = (W[1]-W[0])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "a2"
+
+    c = (W[3]-W[2]-W[1]+W[0])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string += "x·a2"
+
+    c = (W[0])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        string += str(c)+" "
+
+    print(string)
+
+    # g1
+    string0 = "g_1(y,b2) = "
+    string = string0
+    c = (W[6]-W[4])%2
+    if c != 0:
+        if c!=1: string+=str(c)+" "
+        string+= "y"
+
+    c = (W[5]-W[4])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "b2"
+
+    c = (W[7]-W[6]-W[5]+W[4])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string += "y·b2"
+
+    c = (W[4])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        string += str(c)+" "
+
+    print(string)
+
+    # f2
+    string0 = "f_2(x,a1) = "
+    string = string0
+    c = (W[10]-W[8])%2
+    if c != 0:
+        if c!=1: string+=str(c)+" "
+        string+= "x"
+
+    c = (W[9]-W[8])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "a1"
+
+    c = (W[11]-W[10]-W[9]+W[8])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string += "x·a1"
+
+    c = (W[8])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        string += str(c)+" "
+
+    print(string)
+
+    # g2
+    string0 = "g_2(y,b1) = "
+    string = string0
+    c = (W[14]-W[12])%2
+    if c != 0:
+        if c!=1: string+=str(c)+" "
+        string+= "y"
+
+    c = (W[13]-W[12])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "b1"
+
+    c = (W[15]-W[14]-W[13]+W[12])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string += "y·b1"
+
+    c = (W[12])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        string += str(c)+" "
+
+    print(string)
+
+    # f3
+    string0 = "f_3(x,a1,a2) = "
+    string = string0
+    c = (W[20]-W[16])%2
+    if c != 0:
+        if c!=1: string+=str(c)+" "
+        string+= "x"
+
+    c = (W[18]-W[16])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "a1"
+
+    c = (W[17]-W[16])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "a2"
+    
+    c = (W[21]-W[20]-W[18]+W[16])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "x·a1"
+    
+    c = (W[22]-W[20]-W[17]+W[16])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "x·a2"
+
+    c = (W[19]-W[18]-W[17]+W[16])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "a1·a2"
+    
+    c = (W[23] - W[21] - W[22]+W[20] - W[19]+W[18]+W[17] - W[16])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "x·a1·a2"
+    
+    c = (W[16])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        string += str(c)+" "
+    
+    print(string)
+
+    # g3
+    string0 = "g_3(y,b1,b2) = "
+    string = string0
+    c = (W[28]-W[24])%2
+    if c != 0:
+        if c!=1: string+=str(c)+" "
+        string+= "y"
+
+    c = (W[26]-W[24])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "b1"
+
+    c = (W[25]-W[24])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "b2"
+    
+    c = (W[29]-W[28]-W[26]+W[24])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "y·b1"
+    
+    c = (W[30]-W[28]-W[25]+W[24])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "y·b2"
+
+    c = (W[27]-W[26]-W[25]+W[24])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "b1·b2"
+    
+    c = (W[31] - W[29] - W[30]+W[28] - W[27]+W[26]+W[25] - W[24])%2
+    if c != 0:
+        if string != string0: string+=" ⊕ "
+        if c!=1: string+=str(c)+" "
+        string+= "y·b1·b2"
+    
+    c = (W[24])%2
+    if c !=0:
+        if string != string0: string+=" ⊕ "
+        string += str(c)+" "
+    
+    print(string)
+    #print("f_1(x,a2) = ", (W[2]-W[0])%2, "x ⊕ ", (W[1]-W[0])%2 ,"a2 ⊕ ", (W[3]-W[2]-W[1]+W[0])%2 ,"x*a2 ⊕ ", (W[0])%2)
+    #print("g_1(y,b2) = ", (W[6]-W[4])%2, "y ⊕ ", (W[5]-W[4])%2 ,"b2 ⊕ ", (W[7]-W[6]-W[5]+W[4])%2 ,"y*b2 ⊕ ", (W[4])%2)
+    #print("f_2(x,a1) = ", (W[10]-W[8])%2, "x ⊕ ", (W[9]-W[8])%2 ,"a1 ⊕ ", (W[11]-W[10]-W[9]+W[8])%2 ,"x*a1 ⊕ ", (W[8])%2)
+    #print("g_2(y,b1) = ", (W[14]-W[12])%2, "y ⊕ ", (W[13]-W[12])%2 ,"b1 ⊕ ", (W[15]-W[14]-W[13]+W[12])%2 ,"y*b1 ⊕ ", (W[12])%2)
+    #print("f_3(x,a1,a2) = ", (W[20]-W[16])%2, "x ⊕ ", (W[18]-W[16])%2 ,"a1 ⊕ ", (W[17]-W[16])%2 ,"a2 ⊕ ", 
+    #      (W[21]-W[20]-W[18]+W[16])%2 ,"x*a1 ⊕ ", (W[22]-W[20]-W[17]+W[16])%2 ,"x*a2 ⊕ ", 
+    #      (W[19]-W[18]-W[17]+W[16])%2 ,"a1*a2 ⊕ ", 
+    #      (W[23] - W[21] - W[22]+W[20] - W[19]+W[18]+W[17] - W[16])%2,"x*a1*a2 ⊕ ", (W[16])%2)
+    #print("g_3(y,b1,b2) = ", (W[28]-W[24])%2, "y ⊕ ", (W[26]-W[24])%2 ,"b1 ⊕ ", (W[25]-W[24])%2 ,"b2 ⊕ ", 
+    #      (W[29]-W[28]-W[26]+W[24])%2 ,"y*b1 ⊕ ", (W[30]-W[28]-W[25]+W[24])%2 ,"y*b2 ⊕ ", 
+    #      (W[27]-W[26]-W[25]+W[24])%2 ,"b1*b2 ⊕ ", 
+    #      (W[31] - W[29] - W[30]+W[28] - W[27]+W[26]+W[25] - W[24])%2,"y*b1*b2 ⊕ ", (W[16])%2)
 
 
 def projection_to_extremal_wiring(W): # W is a torch.tensor
