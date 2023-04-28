@@ -20,16 +20,6 @@ def functions_to_wiring(f1, g1, f2, g2, f3, g3):
     return W
 
 
-def W_BS09(n):  # n is the number of columns
-    W = torch.tensor([0., 0., 1., 1.,              # f_1(x, a_2) = x
-            0., 0., 1., 1.,              # g_1(y, b_2) = y
-            0., 0., 0., 1.,              # f_2(x, a_1) = a_1*x
-            0., 0., 0., 1.,              # g_2(y, b_1) = b_1*y
-            0., 1., 1., 0., 0., 1., 1., 0.,  # f_3(x, a_1, a_2) = a_1 + a_2 mod 2
-            0., 1., 1., 0., 0., 1., 1., 0.   # g_3(y, b_1, b_2) = b_1 + b_2 mod 2
-            ], requires_grad=True)
-    return torch.t(W.repeat(n, 1))
-
 def W_FWW09(n):  # n is the number of columns
     f1 = torch.zeros((2,2))
     g1 = torch.zeros((2,2))
@@ -52,6 +42,82 @@ def W_FWW09(n):  # n is the number of columns
     W.requires_grad = True
     return torch.t(W.repeat(n, 1))
 
+def W_BS09(n):  # n is the number of columns
+    W = torch.tensor([0., 0., 1., 1.,              # f_1(x, a_2) = x
+            0., 0., 1., 1.,              # g_1(y, b_2) = y
+            0., 0., 0., 1.,              # f_2(x, a_1) = a_1*x
+            0., 0., 0., 1.,              # g_2(y, b_1) = b_1*y
+            0., 1., 1., 0., 0., 1., 1., 0.,  # f_3(x, a_1, a_2) = a_1 + a_2 mod 2
+            0., 1., 1., 0., 0., 1., 1., 0.   # g_3(y, b_1, b_2) = b_1 + b_2 mod 2
+            ], requires_grad=True)
+    return torch.t(W.repeat(n, 1))
+
+def W_ABLPSV09a(n):  # n is the number of columns
+    f1 = torch.zeros((2,2))
+    g1 = torch.zeros((2,2))
+    f2 = torch.zeros((2,2))
+    g2 = torch.zeros((2,2))
+    f3 = torch.zeros((2,2,2))
+    g3 = torch.zeros((2,2,2))
+
+    for x in range(2):
+        for a in range(2):
+            f1[x,a] = x
+            g1[x,a] = x
+            f2[x,a] = (x+a+1)%2
+            g2[x,a] = x*a
+            for a2 in range(2):
+                f3[x,a,a2] = (a+a2+1)%2
+                g3[x,a,a2] = (a+a2+1)%2
+
+    W = functions_to_wiring(f1, g1, f2, g2, f3, g3)
+    W.requires_grad = True
+    return torch.t(W.repeat(n, 1))
+
+def W_ABLPSV09b(n):  # n is the number of columns
+    f1 = torch.zeros((2,2))
+    g1 = torch.zeros((2,2))
+    f2 = torch.zeros((2,2))
+    g2 = torch.zeros((2,2))
+    f3 = torch.zeros((2,2,2))
+    g3 = torch.zeros((2,2,2))
+
+    for x in range(2):
+        for a in range(2):
+            f1[x,a] = x
+            g1[x,a] = x
+            f2[x,a] = x
+            g2[x,a] = x
+            for a2 in range(2):
+                f3[x,a,a2] = a*a2
+                g3[x,a,a2] = a*a2
+
+    W = functions_to_wiring(f1, g1, f2, g2, f3, g3)
+    W.requires_grad = True
+    return torch.t(W.repeat(n, 1))
+
+def W_NSSRRB22(n):  # n is the number of columns
+    f1 = torch.zeros((2,2))
+    g1 = torch.zeros((2,2))
+    f2 = torch.zeros((2,2))
+    g2 = torch.zeros((2,2))
+    f3 = torch.zeros((2,2,2))
+    g3 = torch.zeros((2,2,2))
+
+    for x in range(2):
+        for a in range(2):
+            f1[x,a] = x
+            g1[x,a] = x
+            f2[x,a] = x
+            g2[x,a] = x
+            for a2 in range(2):
+                f3[x,a,a2] = max([a,a2])
+                g3[x,a,a2] = min([a,a2])
+
+    W = functions_to_wiring(f1, g1, f2, g2, f3, g3)
+    W.requires_grad = True
+    return torch.t(W.repeat(n, 1))
+
 def random_wiring(n):  # n is the number of columns
     return torch.rand((32, n), requires_grad=True)
 
@@ -62,24 +128,24 @@ def wiring_to_functions(W):  # BE CAREFUL!! Here W is a list (with 32 entries)
     # f1
     string0 = "f_1(x,a2) = "
     string = string0
-    c = (W[2]-W[0])%2
+    c = float((W[2]-W[0])%2)
     if c != 0:
         if c!=1: string+=str(c)+" "
         string+= "x"
 
-    c = (W[1]-W[0])%2
+    c = float((W[1]-W[0])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "a2"
 
-    c = (W[3]-W[2]-W[1]+W[0])%2
+    c = float((W[3]-W[2]-W[1]+W[0])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string += "x·a2"
 
-    c = (W[0])%2
+    c = float((W[0])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         string += str(c)+" "
@@ -89,24 +155,24 @@ def wiring_to_functions(W):  # BE CAREFUL!! Here W is a list (with 32 entries)
     # g1
     string0 = "g_1(y,b2) = "
     string = string0
-    c = (W[6]-W[4])%2
+    c = float((W[6]-W[4])%2)
     if c != 0:
         if c!=1: string+=str(c)+" "
         string+= "y"
 
-    c = (W[5]-W[4])%2
+    c = float((W[5]-W[4])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "b2"
 
-    c = (W[7]-W[6]-W[5]+W[4])%2
+    c = float((W[7]-W[6]-W[5]+W[4])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string += "y·b2"
 
-    c = (W[4])%2
+    c = float((W[4])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         string += str(c)+" "
@@ -116,24 +182,24 @@ def wiring_to_functions(W):  # BE CAREFUL!! Here W is a list (with 32 entries)
     # f2
     string0 = "f_2(x,a1) = "
     string = string0
-    c = (W[10]-W[8])%2
+    c = float((W[10]-W[8])%2)
     if c != 0:
         if c!=1: string+=str(c)+" "
         string+= "x"
 
-    c = (W[9]-W[8])%2
+    c = float((W[9]-W[8])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "a1"
 
-    c = (W[11]-W[10]-W[9]+W[8])%2
+    c = float((W[11]-W[10]-W[9]+W[8])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string += "x·a1"
 
-    c = (W[8])%2
+    c = float((W[8])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         string += str(c)+" "
@@ -143,24 +209,24 @@ def wiring_to_functions(W):  # BE CAREFUL!! Here W is a list (with 32 entries)
     # g2
     string0 = "g_2(y,b1) = "
     string = string0
-    c = (W[14]-W[12])%2
+    c = float((W[14]-W[12])%2)
     if c != 0:
         if c!=1: string+=str(c)+" "
         string+= "y"
 
-    c = (W[13]-W[12])%2
+    c = float((W[13]-W[12])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "b1"
 
-    c = (W[15]-W[14]-W[13]+W[12])%2
+    c = float((W[15]-W[14]-W[13]+W[12])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string += "y·b1"
 
-    c = (W[12])%2
+    c = float((W[12])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         string += str(c)+" "
@@ -170,48 +236,48 @@ def wiring_to_functions(W):  # BE CAREFUL!! Here W is a list (with 32 entries)
     # f3
     string0 = "f_3(x,a1,a2) = "
     string = string0
-    c = (W[20]-W[16])%2
+    c = float((W[20]-W[16])%2)
     if c != 0:
         if c!=1: string+=str(c)+" "
         string+= "x"
 
-    c = (W[18]-W[16])%2
+    c = float((W[18]-W[16])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "a1"
 
-    c = (W[17]-W[16])%2
+    c = float((W[17]-W[16])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "a2"
     
-    c = (W[21]-W[20]-W[18]+W[16])%2
+    c = float((W[21]-W[20]-W[18]+W[16])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "x·a1"
     
-    c = (W[22]-W[20]-W[17]+W[16])%2
+    c = float((W[22]-W[20]-W[17]+W[16])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "x·a2"
 
-    c = (W[19]-W[18]-W[17]+W[16])%2
+    c = float((W[19]-W[18]-W[17]+W[16])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "a1·a2"
     
-    c = (W[23] - W[21] - W[22]+W[20] - W[19]+W[18]+W[17] - W[16])%2
+    c = float((W[23] - W[21] - W[22]+W[20] - W[19]+W[18]+W[17] - W[16])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "x·a1·a2"
     
-    c = (W[16])%2
+    c = float((W[16])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         string += str(c)+" "
@@ -221,48 +287,48 @@ def wiring_to_functions(W):  # BE CAREFUL!! Here W is a list (with 32 entries)
     # g3
     string0 = "g_3(y,b1,b2) = "
     string = string0
-    c = (W[28]-W[24])%2
+    c = float((W[28]-W[24])%2)
     if c != 0:
         if c!=1: string+=str(c)+" "
         string+= "y"
 
-    c = (W[26]-W[24])%2
+    c = float((W[26]-W[24])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "b1"
 
-    c = (W[25]-W[24])%2
+    c = float((W[25]-W[24])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "b2"
     
-    c = (W[29]-W[28]-W[26]+W[24])%2
+    c = float((W[29]-W[28]-W[26]+W[24])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "y·b1"
     
-    c = (W[30]-W[28]-W[25]+W[24])%2
+    c = float((W[30]-W[28]-W[25]+W[24])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "y·b2"
 
-    c = (W[27]-W[26]-W[25]+W[24])%2
+    c = float((W[27]-W[26]-W[25]+W[24])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "b1·b2"
     
-    c = (W[31] - W[29] - W[30]+W[28] - W[27]+W[26]+W[25] - W[24])%2
+    c = float((W[31] - W[29] - W[30]+W[28] - W[27]+W[26]+W[25] - W[24])%2)
     if c != 0:
         if string != string0: string+=" ⊕ "
         if c!=1: string+=str(c)+" "
         string+= "y·b1·b2"
     
-    c = (W[24])%2
+    c = float((W[24])%2)
     if c !=0:
         if string != string0: string+=" ⊕ "
         string += str(c)+" "
@@ -331,13 +397,12 @@ def P_NL(mu, nu, sigma):
     return new_box
 
 
-
-P_0 = P_L(0,0,0,0)
-P_1 = P_L(0,1,0,1)
-SR = (P_0 + P_1)/2
 PR = P_NL(0,0,0)
 PRbar = P_NL(0,0,1)
 PRprime = P_NL(1,1,1)
+P_0 = P_L(0,0,0,0)
+P_1 = P_L(0,1,0,1)
+SR = (P_0 + P_1)/2
 I = 0.25*torch.ones((4,4))
 SRbar = 2*I-SR
 
