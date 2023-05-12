@@ -280,7 +280,18 @@ def R(W, P, Q):     # W is a 32xn matrix, P and Q are 4x4 matrices
     #return torch.tensordot(T5, torch.ones((4)), dims=1)
     # the output is a 2x2x2x2xn tensor
 
-
+def R_tensor(W, P, Q):     # W is a 32xn matrix, P and Q are 2x2x2x2 tensors
+    P = non_local_boxes.utils.tensor_to_matrix(P)
+    Q = non_local_boxes.utils.tensor_to_matrix(Q)
+    T1 = torch.tensordot(A(W), P, dims=1)  # green term
+    T2 = torch.transpose(torch.tensordot(B(W), Q, dims=1), 4, 3)  # blue term
+    #T3 = torch.reshape(torch.kron(torch.ones((2,2)), T1*T2), (2,2,2,2,-1,4,4))
+    T3 = (T1*T2).repeat(2,2,1,1,1,1,1)
+    T4 = T3 * C(W) * D(W)  # the big bracket
+    return torch.tensordot(T4, torch.ones((4, 4)), dims=2)
+    #T5 = torch.tensordot(T4, torch.ones((4)), dims=1)
+    #return torch.tensordot(T5, torch.ones((4)), dims=1)
+    # the output is a 2x2x2x2xn tensor
 
 
 
@@ -292,6 +303,10 @@ def h_flat(R):  # R is a 2x2x2x2xn tensor
     R = torch.reshape(R, (16, -1))
     return torch.tensordot( non_local_boxes.utils.CHSH_flat, R, dims=1 )  # scalar product of CHSH and each column of R
 
+
+def h_prime_flat(R):  # R is a 2x2x2x2xn tensor
+    R = torch.reshape(R, (16, -1))
+    return torch.tensordot( non_local_boxes.utils.CHSH_prime_flat, R, dims=1 )  # scalar product of CHSH and each column of R
 
 
 

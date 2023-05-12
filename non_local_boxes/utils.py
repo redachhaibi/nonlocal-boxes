@@ -118,6 +118,28 @@ def W_NSSRRB22(n):  # n is the number of columns
     W.requires_grad = True
     return torch.t(W.repeat(n, 1))
 
+def W_Pierre_1(n):  # n is the number of columns
+    f1 = torch.zeros((2,2))
+    g1 = torch.zeros((2,2))
+    f2 = torch.zeros((2,2))
+    g2 = torch.zeros((2,2))
+    f3 = torch.zeros((2,2,2))
+    g3 = torch.zeros((2,2,2))
+
+    for x in range(2):
+        for a in range(2):
+            f1[x,a] = x
+            g1[x,a] = x
+            f2[x,a] = x
+            g2[x,a] = x
+            for a2 in range(2):
+                f3[x,a,a2] = (a*a2+1)%2
+                g3[x,a,a2] = (a*a2+1)%2
+
+    W = functions_to_wiring(f1, g1, f2, g2, f3, g3)
+    W.requires_grad = True
+    return torch.t(W.repeat(n, 1))
+
 def random_wiring(n):  # n is the number of columns
     return torch.rand((32, n), requires_grad=True)
 
@@ -432,6 +454,16 @@ for a in range(2):
 CHSH_flat = matrix_to_tensor( CHSH ).flatten()
 
 
+CHSH_prime = torch.zeros((4,4))
+
+for a in range(2):
+    for b in range(2):
+        for x in range(2):
+            for y in range(2):
+                if (a+b)%2 == ((x+1)%2)*((y+1)%2):
+                    CHSH_prime[2*x+y, 2*a+b]=0.25
+
+CHSH_prime_flat = matrix_to_tensor( CHSH_prime ).flatten()
 
 #
 #  Which boxes do we test?
