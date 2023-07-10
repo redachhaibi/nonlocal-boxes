@@ -20,7 +20,7 @@ The repository is structured as follows. We only describe the most important fil
 |  |-- `Eval4.ipynb`: Tests with the package containing the function to evaluate.
 |  |-- `Gradient-Descent.ipynb`: Basic gradient descent.
 |  |-- `Gradient-Descent-2.ipynb`: Clean version of `Gradient-Descent.ipynb`.
-|  |-- `Gradient-Descent-3.ipynb`: Same as `Gradient-Descent-2.ipynb`, but with tests with different boxes. -> FIND NEW COLLAPSING WIRING
+|  |-- `Gradient-Descent-3.ipynb`: Same as `Gradient-Descent-2.ipynb`, but with tests with different boxes. -> FIND NEW COLLAPSING WIRING (+ heavy ball + line search)
 |  |-- `Pytorch-tests.ipynb`: Tests with PyTorch.
 |  |-- `sdf2pointCloud_2D.ipynb`: Reda s example of gradient descent.
 |  |-- `Test-Wiring.ipynb`: Tests if a new wiring is new and check which triangle is collapsed.

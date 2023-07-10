@@ -52,6 +52,10 @@ def W_BS09(n):  # n is the number of columns
             ], requires_grad=True)
     return torch.t(W.repeat(n, 1))
 
+def W9(n):  # n is the number of columns
+    W = torch.tensor([0.,1.,1.,0.,0.,0.,1.,0.,0.,0.,1.,1.,0.,0.,1.,1.,1.,0.,0.,1.,1.,0.,0.,1.,1.,0.,0.,1.,1.,0.,0.,1.], requires_grad=True)
+    return torch.t(W.repeat(n, 1))
+
 def W_ABLPSV09a(n):  # n is the number of columns
     f1 = torch.zeros((2,2))
     g1 = torch.zeros((2,2))
