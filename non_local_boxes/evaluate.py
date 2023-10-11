@@ -3,7 +3,7 @@ import torch
 import non_local_boxes.utils
 
 
-nb_columns = int(1e4)
+nb_columns = int(1e3)
 
 
 
